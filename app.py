@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-mascot: a microservice for serving mascot data
+mascot: a microservice for serving mascot data - 2
 """
 import json
 from flask import Flask, jsonify, abort, make_response
