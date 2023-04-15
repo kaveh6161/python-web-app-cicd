@@ -36,3 +36,18 @@ jobs:
       run: az acr login --name ${{ secrets.AZURE_REGISTRY_NAME }}
     - name: Push to ACR
       run: docker push "${{ secrets.AZURE_REGISTRY_NAME }}/${{ env.APPLICATION_NAME }}:latest"
+  
+  test_image:
+    needs: [build_image]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Azure Login
+      uses: Azure/login@v1
+      with:
+        # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
+        creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
+    
+    - name: Run unit tests in container
+      run: docker run "${{ secrets.AZURE_REGISTRY_NAME }}/${{ env.APPLICATION_NAME }}:latest" -m unittest --verbose --failfast
+
+ 
