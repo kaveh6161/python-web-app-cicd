@@ -24,7 +24,7 @@ jobs:
     needs: [lint]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3.5
+    - uses: actions/checkout@v3
     - name: Azure Login
       uses: Azure/login@v1
       with:
