@@ -60,8 +60,12 @@ jobs:
       with:
         # Paste output of `az ad sp create-for-rbac` as value of secret variable: AZURE_CREDENTIALS
         creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
-    
     - name: Deploy to Azure App Service
       run: |
-        az webapp config container set --name ${{ env.APPLICATION_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --docker-custom-image-name "${{ secrets.AZURE_REGISTRY_NAME }}/${{
-
+        az webapp config container set --name ${{ env.APPLICATION_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --docker-custom-image-name "${{ secrets.AZURE_REGISTRY_NAME }}/${{ env.APPLICATION_NAME }}:latest"
+        az webapp restart --name ${{ env.APPLICATION_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+    - name: Test deployment
+      run: |
+        DEPLOY_URL=$(az webapp show --name ${{ env.APPLICATION_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --query 'defaultHostName' -o tsv)
+        curl -sL --max-time 300 -o /dev/null -w "%{http_code}" "http://$DEPLOY_URL" | grep 200 || exit 1
+        
